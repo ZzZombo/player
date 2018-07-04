@@ -1,0 +1,40 @@
+{
+	"plugins":
+	{
+		"autoprefixer":
+		{},
+		"postcss-colormin":
+		{},
+		"postcss-fixes":
+		{},
+		"cssnano":
+		{
+			"safe": true,
+			"calc": false
+		},
+		"postcss-minify-selectors":
+		{},
+		"postcss-merge-rules":
+		{},
+		"postcss-merge-longhand":
+		{},
+		"postcss-merge-idents":
+		{},
+		"postcss-discard-unused":
+		{},
+		"postcss-discard-empty":
+		{},
+		"postcss-discard-duplicates":
+		{},
+		"postcss-discard-comments":
+		{},
+		"postcss-convert-values":
+		{},
+		"postcss-clean":
+		{},
+		"postcss-cleaner":
+		{
+			"sources": ["./src/*"]
+		}
+	}
+}
