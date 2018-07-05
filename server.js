@@ -6,94 +6,98 @@ const webpack = require('webpack');
 const path = require('path');
 const contentDir = path.resolve(__dirname, 'build');
 const argv = require('optimist').argv;
-
-const app = express();
-app.use('/proxy/',proxy((req) => req.url.substr(1),
+const ngrok = require('ngrok');
+ngrok.connect(3000).then((tunnelUrl) =>
 {
-	proxyReqPathResolver: function(req)
+	const app = express();
+	app.use('/proxy/',proxy((req) => req.url.substr(1),
 	{
-		return url.parse(req.url.substr(1)).path;
-	},
-	userResDecorator: function(proxyRes, proxyResData, userReq, userRes)
-	{
-		if(userRes._headers.location)
+		proxyReqPathResolver: function(req)
 		{
-			const pUrl = url.parse(userRes._headers.location);
-			userRes.set('x-base-url', `${pUrl.protocol}//${pUrl.host}/`);
-			userRes.location(`http://localhost:3000/proxy/${userRes._headers.location}`);
-		}
-		else
-			userRes.set('x-base-url',`${userReq.protocol}://${url.parse(userReq.url.substr(1)).host}/`);
-		console.log('PROXY',userReq.url.substr(1));
-		/*console.log(userReq.headers);
-		console.log(userRes._headers);*/
-		return proxyResData;
-  },
-	proxyReqOptDecorator: function(proxyReqOpts, srcReq)
-	{
-		proxyReqOpts.headers['referer'] = srcReq.headers['x-referer'] || srcReq.headers.referer;
-		if(!proxyReqOpts.headers['referer'])
-			delete proxyReqOpts.headers['referer'];
-		return proxyReqOpts;
-	}
-}));
-
-if(argv.mode == 'debug')
-{
-	const webpackDevMiddleware = require('webpack-dev-middleware');
-	const config = require('./webpack.config.development.js');
-	const compiler = webpack(config);
-
-	app.use(webpackDevMiddleware(compiler,
-	{
-		publicPath: config.output.publicPath,
-		historyApiFallback: true,
-		writeToDisk: true,
-	}));
-}
-else
-{
-	const fs = require('fs');
-	app.use(function (req, res, next)
-	{
-		if(req.acceptsEncodings('gzip'))
+			return url.parse(req.url.substr(1)).path;
+		},
+		userResDecorator: function(proxyRes, proxyResData, userReq, userRes)
 		{
-			const file = req.path.substr(1) || 'index.html';
-			const gzip = `${file}.gzip`;
-			const exists = fs.existsSync(path.resolve(contentDir, gzip));
-			console.log(req.url, gzip, exists);
-			if(exists)
+			if(userRes._headers.location)
 			{
-				req.url = '/' + gzip;
-				res.locals.gzip = true;
+				const pUrl = url.parse(userRes._headers.location);
+				userRes.set('x-base-url', `${pUrl.protocol}//${pUrl.host}/`);
+				userRes.location(`${userReq.protocol}://${userReq.hostname}:`+
+					`${userReq.headers.host.split(':')[1] || 80}/proxy/${userRes._headers.location}`);
 			}
-			return next();
-		}
-		next();
-	});
-	app.use(express.static(contentDir,
-	{
-		maxAge: '1 day',
-		setHeaders(res)
+			else
+				userRes.set('x-base-url',`${userReq.protocol}://${url.parse(userReq.url.substr(1)).host}/`);
+			console.log('PROXY',userReq.url.substr(1));
+			/*console.log(userReq.headers);
+			console.log(userRes._headers);*/
+			return proxyResData;
+		},
+		proxyReqOptDecorator: function(proxyReqOpts, srcReq)
 		{
-			if(res.locals.gzip)
-				res.set('Content-Encoding', 'gzip');
+			proxyReqOpts.headers['referer'] = srcReq.headers['x-referer'] || srcReq.headers.referer;
+			if(!proxyReqOpts.headers['referer'])
+				delete proxyReqOpts.headers['referer'];
+			return proxyReqOpts;
 		}
 	}));
-}
-app.get('/*', function(req, res)
-{
-	res.sendFile(path.resolve(contentDir,'index.html'), function(err)
+
+	if(argv.mode == 'debug')
 	{
-		if(err)
-			res.status(500).send(err);
+		const webpackDevMiddleware = require('webpack-dev-middleware');
+		const config = require('./webpack.config.development.js');
+		const compiler = webpack(config);
+
+		app.use(webpackDevMiddleware(compiler,
+		{
+			publicPath: config.output.publicPath,
+			historyApiFallback: true,
+			writeToDisk: true,
+		}));
+	}
+	else
+	{
+		const fs = require('fs');
+		app.use(function (req, res, next)
+		{
+			if(req.acceptsEncodings('gzip'))
+			{
+				const file = req.path.substr(1) || 'index.html';
+				const gzip = `${file}.gzip`;
+				const exists = fs.existsSync(path.resolve(contentDir, gzip));
+				console.log(req.url, gzip, exists);
+				if(exists)
+				{
+					req.url = '/' + gzip;
+					res.locals.gzip = true;
+				}
+				return next();
+			}
+			next();
+		});
+		app.use(express.static(contentDir,
+		{
+			maxAge: '1 day',
+			setHeaders(res)
+			{
+				if(res.locals.gzip)
+					res.set('Content-Encoding', 'gzip');
+			}
+		}));
+	}
+	app.get('/*', function(req, res)
+	{
+		res.sendFile(path.resolve(contentDir,'index.html'), function(err)
+		{
+			if(err)
+				res.status(500).send(err);
+		});
 	});
-});
-app.use(function (req, res)
-{
-	res.status(404).send(`<strong>Requested resource <code>${req.url}</code> not found.</strong>`);
-});
-app.listen(3000, function ()
-{
-	console.log('Listening on port 3000!\n');
+	app.use(function (req, res)
+	{
+		res.status(404).send(`<strong>Requested resource <code>${req.url}</code> not found.</strong>`);
+	});
+	app.listen(3000, function ()
+	{
+		console.log(`[${tunnelUrl}] Listening on port 3000!`);
+	});
 });

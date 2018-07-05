@@ -89,11 +89,11 @@ class App extends Component
 					</label>
 					{' '}
 					<label>
-						Сезон: <input type='number' required value={this.state.season} onChange={this.season}/>
+						Сезон: <input type='number' min='1' required value={this.state.season} onChange={this.season}/>
 					</label>
 					{' '}
 					<label>
-						Серия: <input type='number' required value={this.state.episode} onChange={this.episode}/>
+						Серия: <input type='number' min='0' required value={this.state.episode} onChange={this.episode}/>
 					</label>
 					<button onClick={this.play} disabled={!this.state.movieID}>Смотреть</button>
 					{this.state.play && <Redirect push to={`/${this.state.movieID}`} />}

@@ -31,10 +31,6 @@
 		"postcss-convert-values":
 		{},
 		"postcss-clean":
-		{},
-		"postcss-cleaner":
-		{
-			"sources": ["./src/*"]
-		}
+		{}
 	}
 }

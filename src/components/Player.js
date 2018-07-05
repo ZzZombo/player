@@ -79,7 +79,7 @@ export default class Player extends Component
 								beforeSend: function(xhr, options)
 								{
 									if(!options.url.match(/^(?:[a-z][a-z0-9+.-]*:|\/\/)/i))
-										options.url = 'http://localhost:3000/proxy/${url}' + (options.url.charAt(0) != '/' ? options.url : options.url.substr(1));
+										options.url = '${location.protocol}//${location.host}/proxy/${url}' + (options.url.charAt(0) != '/' ? options.url : options.url.substr(1));
 								}
 							}`),
 						});
