@@ -34,10 +34,14 @@ module.exports = merge(config,
 		{
 			test: /\.css$/,
 			include: src,
-			use: [
-				'style-loader',
-				'css-loader'
-			]
+			use: ['style-loader',
+			{
+				loader: 'css-loader',
+				options:
+				{
+					modules: true,
+				}
+			},]
 		},
 		{
 			test: /\.js$/,

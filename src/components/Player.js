@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import styles from './Player.css';
 import $ from 'jquery';
 import _ from 'lodash';
 
@@ -28,11 +29,7 @@ class PlayerFrame extends Component
 	}
 	render()
 	{
-		return <iframe src={this.state.url} style={
-		{
-			flex: '1 1 auto',
-			border: 0,
-		}} allowFullScreen />
+		return <iframe src={this.state.url} className={styles['player-frame']} allowFullScreen />
 	}
 }
 
@@ -41,7 +38,7 @@ export default class Player extends Component
 	constructor(props)
 	{
 		super(props);
-		this.state = {content: <body><i style='color: gray'>Загрузка…</i></body>};
+		this.state = {content: '<body><i style="color: gray">Загрузка…</i></body>'};
 	}
 	componentDidUpdate({season,episode})
 	{
@@ -64,7 +61,7 @@ export default class Player extends Component
 					r.done((contents,_,res) =>
 					{
 						url = res.getResponseHeader('x-base-url');
-						contents = contents.replace(/<head>/,`<head>\n<base href="${url}">`);
+						contents = contents.replace('<head>',`<head>\n  <base href="${url}">`);
 						const m = contents.match(/window\.video_balancer\s*=\s*new\s+VideoBalancer\s*\(\s*(\{\s*[^]*\s*})\)/);
 						const o = Function('return '+m[1])();
 						o.adv = {};

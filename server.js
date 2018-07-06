@@ -18,15 +18,18 @@ ngrok.connect(3000).then((tunnelUrl) =>
 		},
 		userResDecorator: function(proxyRes, proxyResData, userReq, userRes)
 		{
+			const appProtocol = userReq.headers['x-forwarded-proto'] || userReq.protocol;
+			const port = userReq.headers.host.split(':')[1] || (appProtocol == 'http' ? 80 : 443);
+			const publicUrl = `${appProtocol}://${userReq.hostname}:${port}/proxy/`;
+			let parsedUrl;
 			if(userRes._headers.location)
 			{
-				const pUrl = url.parse(userRes._headers.location);
-				userRes.set('x-base-url', `${pUrl.protocol}//${pUrl.host}/`);
-				userRes.location(`${userReq.protocol}://${userReq.hostname}:`+
-					`${userReq.headers.host.split(':')[1] || 80}/proxy/${userRes._headers.location}`);
+				parsedUrl = url.parse(userRes._headers.location);
+				userRes.location(`${publicUrl}${userRes._headers.location}`);
 			}
 			else
-				userRes.set('x-base-url',`${userReq.protocol}://${url.parse(userReq.url.substr(1)).host}/`);
+				parsedUrl = url.parse(userReq.url.substr(1));
+			userRes.set('x-base-url',`${parsedUrl.protocol}//${parsedUrl.hostname}/`);
 			console.log('PROXY',userReq.url.substr(1));
 			/*console.log(userReq.headers);
 			console.log(userRes._headers);*/

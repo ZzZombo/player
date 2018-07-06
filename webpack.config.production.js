@@ -65,15 +65,15 @@ module.exports = merge(config,
 			include: src,
 			exclude: /node_modules/,
 			use: [MiniCssExtractPlugin.loader,
+			{
+				loader: 'css-loader',
+				options:
 				{
-					loader: 'css-loader',
-					options:
-					{
-						importLoaders: 1,
-					}
-				},
-				'postcss-loader'
-			]
+					importLoaders: 1,
+					modules: true,
+				}
+			},
+			'postcss-loader',]
 		},
 		{
 			test: /\.js$/,

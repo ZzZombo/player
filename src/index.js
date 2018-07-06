@@ -4,7 +4,7 @@ import { BrowserRouter as Router, Route, Redirect } from "react-router-dom";
 import { createStore, combineReducers } from 'redux';
 import { Provider, connect } from 'react-redux';
 import Player from './components/Player';
-import './app.css';
+import styles from './app.css';
 
 const style={textTransform:'capitalize'};
 function setEpisode(episode)
@@ -76,12 +76,7 @@ class App extends Component
 	render()
 	{
 		return <Router>
-			<div style={
-			{
-				display: 'flex',
-				flexFlow: 'column',
-				height: '100%',
-			}}>
+			<div className={styles.main}>
 				Welcome to React!
 				<div>
 					<label>
@@ -119,7 +114,7 @@ const ReduxApp = connect(null, function(dispatch)
 })(App);
 
 const root = document.createElement('div');
-root.id = 'app-root';
+root.className = styles['app-root'];
 document.body.appendChild(root);
 ReactDOM.render(<Provider store={store}>
 	<ReduxApp />
