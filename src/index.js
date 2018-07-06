@@ -6,7 +6,6 @@ import { Provider, connect } from 'react-redux';
 import Player from './components/Player';
 import styles from './app.css';
 
-const style={textTransform:'capitalize'};
 function setEpisode(episode)
 {
 	return {episode,type:'episode'};

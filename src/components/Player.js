@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
-import styles from './Player.css';
 import $ from 'jquery';
 import _ from 'lodash';
+import styles from './Player.css';
 
 function load(url, referer='')
 {
